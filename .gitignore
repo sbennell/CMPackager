@@ -3,7 +3,7 @@ ExtraFiles/Scripts/AppleSUCatalog.sucatalog
 CMPackager.prefs
 
 # Ignore Recipes Folder
-Recipes/*
+#Recipes/*
 
 # Except for the Template.xml
-!Recipes/Template.xml
+#!Recipes/Template.xml
