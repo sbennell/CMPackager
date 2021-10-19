@@ -399,6 +399,10 @@
 		<AllowRepair></AllowRepair>
 		<!-- DeploymentCollection - [String] Collection for the software to be deployed to -->
 		<DeploymentCollection></DeploymentCollection>
+		<!-- DeployPurpose - [String] allowing setting the application as Required if not set it will default to Available -->
+		<DeployPurpose></DeployPurpose>
+		<!-- UserNotification - [String] allowing setting the application as DisplayAll or HideAll if not set it will default to DisplaySoftwareCenterOnly -->
+		<UserNotification></UserNotification>
 	</Deployment>
 </ApplicationDef>
 

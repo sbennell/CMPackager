@@ -1599,6 +1599,14 @@ Combines the output from Get-ChildItem with the Get-ExtensionAttribute function,
 				$DeploymentSplat['TimeBaseOn'] = $Recipe.ApplicationDef.Deployment.TimeBaseOn
 			}
 
+			if (-not ([string]::IsNullOrEmpty($Recipe.ApplicationDef.Deployment.DeployPurpose))) {
+				$DeploymentSplat['DeployPurpose'] = $Recipe.ApplicationDef.Deployment.DeployPurpose
+			}
+			
+			if (-not ([string]::IsNullOrEmpty($Recipe.ApplicationDef.Deployment.UserNotification))) {
+				$DeploymentSplat['UserNotification'] = $Recipe.ApplicationDef.Deployment.UserNotification
+			}
+
 			$DeploymentCollections = If (
 				-not ([string]::IsNullOrEmpty($Recipe.ApplicationDef.Deployment.DeploymentCollection))
 				) {
