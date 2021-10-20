@@ -1606,6 +1606,10 @@ Combines the output from Get-ChildItem with the Get-ExtensionAttribute function,
 			if (-not ([string]::IsNullOrEmpty($Recipe.ApplicationDef.Deployment.UserNotification))) {
 				$DeploymentSplat['UserNotification'] = $Recipe.ApplicationDef.Deployment.UserNotification
 			}
+			
+			if (-not ([string]::IsNullOrEmpty($Recipe.ApplicationDef.Deployment.AutoCloseExecutable))) {
+				$DeploymentSplat['AutoCloseExecutable'] = [System.Convert]::ToBoolean($Recipe.ApplicationDef.Deployment.AutoCloseExecutable)
+			}
 
 			$DeploymentCollections = If (
 				-not ([string]::IsNullOrEmpty($Recipe.ApplicationDef.Deployment.DeploymentCollection))
@@ -1619,7 +1623,7 @@ Combines the output from Get-ChildItem with the Get-ExtensionAttribute function,
 				Try {
 					Add-LogContent "Deploying $ApplicationName $ApplicationSWVersion to $DeploymentCollection"
 					If ($DeploymentSplat.UpdateSupersedence) { Add-LogContent "UpdateSuperseded enabled, new package will automatically upgrade previous version" }
-					New-CMApplicationDeployment -CollectionName $DeploymentCollection @DeploymentSplat
+					New-CMApplicationDeployment -CollectionName $DeploymentCollection @DeploymentSplat 
 				}
 				Catch {
 					$ErrorMessage = $_.Exception.Message

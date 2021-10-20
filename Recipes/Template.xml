@@ -400,9 +400,11 @@
 		<!-- DeploymentCollection - [String] Collection for the software to be deployed to -->
 		<DeploymentCollection></DeploymentCollection>
 		<!-- DeployPurpose - [String] allowing setting the application as Required if not set it will default to Available -->
-		<DeployPurpose></DeployPurpose>
+		<DeployPurpose>Required</DeployPurpose>
 		<!-- UserNotification - [String] allowing setting the application as DisplayAll or HideAll if not set it will default to DisplaySoftwareCenterOnly -->
-		<UserNotification></UserNotification>
+		<UserNotification>HideAll</UserNotification>
+		<!-- AutoCloseExecutable - [String] set this parameter to true to enable the application deployment setting for install behaviors.  -->
+		<AutoCloseExecutable>True</AutoCloseExecutable>
 	</Deployment>
 </ApplicationDef>
 
