@@ -44,13 +44,13 @@
 			<CustomDetectionMethods>
 				<DetectionClause>
 					<DetectionClauseType>File</DetectionClauseType>
-					<Name>Scratch Desktop.exe</Name>
-					<Path>%ProgramFiles%\Scratch Desktop\</Path>
+					<Name>Scratch 3.exe</Name>
+					<Path>%ProgramFiles(x86)%\Scratch 3\</Path>
 					<PropertyType>Version</PropertyType>
 					<ExpectedValue>$FullVersion</ExpectedValue>
 					<ExpressionOperator>GreaterEquals</ExpressionOperator>
 					<Value>True</Value>
-					<Is64Bit>True</Is64Bit>
+					<Is64Bit>false</Is64Bit>
 				</DetectionClause>
 			</CustomDetectionMethods>
 		</DeploymentType>
