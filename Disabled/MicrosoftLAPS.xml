@@ -13,17 +13,17 @@
             <PrefetchScript>$URL = ((Invoke-WebRequest "https://www.microsoft.com/en-us/download/confirmation.aspx?id=46899" -UseBasicParsing).Links | Where-Object href -like "*LAPS.x64.msi")[0].href</PrefetchScript>
             <URL></URL>
             <DownloadFileName>LAPS.x64.msi</DownloadFileName>
-			<DownloadVersionCheck>[String]$Version = ([String](Get-MSIInfo -Path $DownloadFile -Property ProductVersion)).TrimStart().TrimEnd()</DownloadVersionCheck>
-			<FullVersion></FullVersion>
-			<Version></Version>
+            <DownloadVersionCheck>[String]$Version = ([String](Get-MSIInfo -Path $DownloadFile -Property ProductVersion)).TrimStart().TrimEnd()</DownloadVersionCheck>
+            <FullVersion></FullVersion>
+            <Version></Version>
         </Download>
         <Download DeploymentType="DeploymentType2">
             <PrefetchScript>$URL = ((Invoke-WebRequest "https://www.microsoft.com/en-us/download/confirmation.aspx?id=46899" -UseBasicParsing).Links | Where-Object href -like "*LAPS.x86.msi")[0].href</PrefetchScript>
             <URL></URL>
             <DownloadFileName>LAPS.x86.msi</DownloadFileName>
-			<DownloadVersionCheck>[String]$Version = ([String](Get-MSIInfo -Path $DownloadFile -Property ProductVersion)).TrimStart().TrimEnd()</DownloadVersionCheck>
-			<FullVersion></FullVersion>
-			<Version></Version>
+            <DownloadVersionCheck>[String]$Version = ([String](Get-MSIInfo -Path $DownloadFile -Property ProductVersion)).TrimStart().TrimEnd()</DownloadVersionCheck>
+            <FullVersion></FullVersion>
+            <Version></Version>
         </Download>
 	</Downloads>
 	<DeploymentTypes>
