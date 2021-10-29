@@ -6,7 +6,7 @@
         <AutoInstall>True</AutoInstall>
         <UserDocumentation>https://www.microsoft.com/en-us/download/details.aspx?id=46899</UserDocumentation>
         <Icon>LAPS.ico</Icon>
-		<FolderPath>Microsoft\LAPS</FolderPath>
+        <FolderPath>Microsoft\LAPS</FolderPath>
     </Application>
     <Downloads>
         <Download DeploymentType="DeploymentType1">
