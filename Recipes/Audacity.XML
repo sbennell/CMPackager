@@ -1,0 +1,108 @@
+<ApplicationDef>
+	<Application>
+		<Name>Audacity</Name>
+		<Description></Description>
+		<Publisher>audacityteam</Publisher>
+		<AutoInstall>True</AutoInstall>
+		<UserDocumentation>https://www.audacityteam.org/</UserDocumentation>
+		<Icon>Audacity.png</Icon>
+		<FolderPath>Audacity</FolderPath>
+	</Application>
+	<Downloads>
+		<Download DeploymentType="DeploymentType1">
+			<PrefetchScript>$LinkPath = ((Invoke-WebRequest https://github.com/audacity/audacity/releases/latest -UseBasicParsing)| Select-Object -ExpandProperty Links | Where-Object -Property href -Like "*audacity-win-*-64bit.exe").href
+			$Download.Version = $LinkPath -replace '.*download/Audacity-' -replace '/audacity-win-*.*.*-64bit.*$'
+			$Version = $Download.Version
+			$FullVersion = $Download.Version
+			$URL = "https://github.com$LinkPath"</PrefetchScript>
+			<URL></URL>
+			<DownloadFileName>Audacity64.exe</DownloadFileName>
+			<Version></Version>
+			<FullVersion></FullVersion>
+			<DownloadVersionCheck></DownloadVersionCheck>
+			<ExtraCopyFunctions></ExtraCopyFunctions>
+		</Download>
+		<Download DeploymentType="DeploymentType2">
+			<PrefetchScript>$LinkPath = ((Invoke-WebRequest https://github.com/audacity/audacity/releases/latest -UseBasicParsing)| Select-Object -ExpandProperty Links | Where-Object -Property href -Like "*audacity-win-*-32bit.exe").href
+			$Download.Version = $LinkPath -replace '.*download/Audacity-' -replace '/audacity-win-*.*.*-32bit.*$'
+			$Version = $Download.Version
+			$FullVersion = $Download.Version
+			$URL = "https://github.com$LinkPath"</PrefetchScript>
+			<URL></URL>
+			<DownloadFileName>Audacity32.exe</DownloadFileName>
+			<Version></Version>
+			<FullVersion></FullVersion>
+			<DownloadVersionCheck>			</DownloadVersionCheck>
+			<ExtraCopyFunctions></ExtraCopyFunctions>
+		</Download>
+	</Downloads>
+	<DeploymentTypes>
+		<DeploymentType Name="DeploymentType1">
+			<DeploymentTypeName>Audacity Installer 64</DeploymentTypeName>
+			<InstallationType>Script</InstallationType>
+			<CacheContent>False</CacheContent>
+			<BranchCache>True</BranchCache>
+			<ContentFallback>True</ContentFallback>
+			<OnSlowNetwork>Download</OnSlowNetwork>
+			<InstallProgram>Audacity64.exe /VERYSILENT /NORESTART</InstallProgram>
+			<UninstallCmd></UninstallCmd>
+			<InstallationBehaviorType>InstallForSystem</InstallationBehaviorType>
+			<LogonReqType>WhetherOrNotUserLoggedOn</LogonReqType>
+			<UserInteractionMode>Hidden</UserInteractionMode>
+			<EstRuntimeMins>15</EstRuntimeMins>
+			<MaxRuntimeMins>60</MaxRuntimeMins>
+			<RebootBehavior>BasedOnExitCode</RebootBehavior>
+			<DetectionMethodType>Custom</DetectionMethodType>
+			<CustomDetectionMethods>
+				<DetectionClause>
+					<DetectionClauseType>File</DetectionClauseType>
+					<Name>Audacity.exe</Name>
+					<Path>%ProgramFiles%\Audacity\</Path>
+					<PropertyType>Version</PropertyType>
+					<ExpectedValue>$Version</ExpectedValue>
+					<ExpressionOperator>GreaterEquals</ExpressionOperator>
+					<Value>True</Value>
+				</DetectionClause>
+			</CustomDetectionMethods>
+		</DeploymentType>
+		<DeploymentType Name="DeploymentType2">
+			<DeploymentTypeName>Audacity Installer 32</DeploymentTypeName>
+			<InstallationType>Script</InstallationType>
+			<CacheContent>False</CacheContent>
+			<BranchCache>True</BranchCache>
+			<ContentFallback>True</ContentFallback>
+			<OnSlowNetwork>Download</OnSlowNetwork>
+			<InstallProgram>Audacity32.exe /VERYSILENT /NORESTART</InstallProgram>
+			<UninstallCmd></UninstallCmd>
+			<InstallationBehaviorType>InstallForSystem</InstallationBehaviorType>
+			<LogonReqType>WhetherOrNotUserLoggedOn</LogonReqType>
+			<UserInteractionMode>Hidden</UserInteractionMode>
+			<EstRuntimeMins>15</EstRuntimeMins>
+			<MaxRuntimeMins>60</MaxRuntimeMins>
+			<RebootBehavior>BasedOnExitCode</RebootBehavior>
+			<DetectionMethodType>Custom</DetectionMethodType>
+			<CustomDetectionMethods>
+				<DetectionClause>
+					<DetectionClauseType>File</DetectionClauseType>
+					<Name>Audacity.exe</Name>
+					<Path>%ProgramFiles (x86)%\Audacity\</Path>
+					<PropertyType>Version</PropertyType>
+					<ExpectedValue>$Version</ExpectedValue>
+					<ExpressionOperator>GreaterEquals</ExpressionOperator>
+					<Value>True</Value>
+				</DetectionClause>
+			</CustomDetectionMethods>
+		</DeploymentType>
+	</DeploymentTypes>
+	<Distribution>
+		<DistributeContent>True</DistributeContent>
+	</Distribution>
+	<Supersedence>
+		<Supersedence>True</Supersedence>
+		<Uninstall>False</Uninstall>
+	</Supersedence>
+	<Deployment>
+		<DeploySoftware>True</DeploySoftware>
+		<UpdateSuperseded>True</UpdateSuperseded>
+	</Deployment>
+</ApplicationDef>
