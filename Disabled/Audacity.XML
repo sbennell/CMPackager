@@ -10,36 +10,41 @@
 	</Application>
 	<Downloads>
 		<Download DeploymentType="DeploymentType1">
-			<PrefetchScript>
-			$Releases = 'https://fossies.org/windows/misc/'
-			$Filename = (Invoke-WebRequest -Uri $Releases -UseBasicParsing).Links | Where-Object -Property href -Match 'audacity-win-.*.exe$' | Select-Object -First 1 -expand href
-			[String]$Download.Version = $Filename -split '-|.exe' | select -Skip 2 -First 1
-			$URL = $Releases + $Filename
-			$HTTPheaders = @{
-				'Referer'    = $Releases;
-				'User-Agent' = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36'
-			}
-			</PrefetchScript>
+			<PrefetchScript>$LinkPath = ((Invoke-WebRequest https://github.com/audacity/audacity/releases/latest -UseBasicParsing)| Select-Object -ExpandProperty Links | Where-Object -Property href -Like "*audacity-win-*-64bit.exe").href
+			$Download.Version = $LinkPath -replace '.*download/Audacity-' -replace '/audacity-win-*.*.*-64bit.*$'
+			$Version = $Download.Version
+			$FullVersion = $Download.Version
+			$URL = "https://github.com$LinkPath"</PrefetchScript>
 			<URL></URL>
-			<DownloadFileName>Audacity.exe</DownloadFileName>
+			<DownloadFileName>Audacity64.exe</DownloadFileName>
 			<Version></Version>
 			<FullVersion></FullVersion>
-			<DownloadVersionCheck>
-			$FullVersion = (Get-ItemProperty $DownloadFile).VersionInfo.FileVersion.TrimStart().TrimEnd()
-			$Version = ($FullVersion).Replace(".0","").TrimStart().TrimEnd()
-			</DownloadVersionCheck>
+			<DownloadVersionCheck></DownloadVersionCheck>
+			<ExtraCopyFunctions></ExtraCopyFunctions>
+		</Download>
+		<Download DeploymentType="DeploymentType2">
+			<PrefetchScript>$LinkPath = ((Invoke-WebRequest https://github.com/audacity/audacity/releases/latest -UseBasicParsing)| Select-Object -ExpandProperty Links | Where-Object -Property href -Like "*audacity-win-*-32bit.exe").href
+			$Download.Version = $LinkPath -replace '.*download/Audacity-' -replace '/audacity-win-*.*.*-32bit.*$'
+			$Version = $Download.Version
+			$FullVersion = $Download.Version
+			$URL = "https://github.com$LinkPath"</PrefetchScript>
+			<URL></URL>
+			<DownloadFileName>Audacity32.exe</DownloadFileName>
+			<Version></Version>
+			<FullVersion></FullVersion>
+			<DownloadVersionCheck>			</DownloadVersionCheck>
 			<ExtraCopyFunctions></ExtraCopyFunctions>
 		</Download>
 	</Downloads>
 	<DeploymentTypes>
 		<DeploymentType Name="DeploymentType1">
-			<DeploymentTypeName>Audacity Installer</DeploymentTypeName>
+			<DeploymentTypeName>Audacity Installer 64</DeploymentTypeName>
 			<InstallationType>Script</InstallationType>
 			<CacheContent>False</CacheContent>
 			<BranchCache>True</BranchCache>
 			<ContentFallback>True</ContentFallback>
 			<OnSlowNetwork>Download</OnSlowNetwork>
-			<InstallProgram>Audacity.exe /VERYSILENT /NORESTART</InstallProgram>
+			<InstallProgram>Audacity64.exe /VERYSILENT /NORESTART</InstallProgram>
 			<UninstallCmd></UninstallCmd>
 			<InstallationBehaviorType>InstallForSystem</InstallationBehaviorType>
 			<LogonReqType>WhetherOrNotUserLoggedOn</LogonReqType>
@@ -52,9 +57,37 @@
 				<DetectionClause>
 					<DetectionClauseType>File</DetectionClauseType>
 					<Name>Audacity.exe</Name>
-					<Path>%ProgramFiles(x86)%\Audacity\</Path>
+					<Path>%ProgramFiles%\Audacity\</Path>
 					<PropertyType>Version</PropertyType>
-					<ExpectedValue>$FullVersion</ExpectedValue>
+					<ExpectedValue>$Version</ExpectedValue>
+					<ExpressionOperator>GreaterEquals</ExpressionOperator>
+					<Value>True</Value>
+				</DetectionClause>
+			</CustomDetectionMethods>
+		</DeploymentType>
+		<DeploymentType Name="DeploymentType2">
+			<DeploymentTypeName>Audacity Installer 32</DeploymentTypeName>
+			<InstallationType>Script</InstallationType>
+			<CacheContent>False</CacheContent>
+			<BranchCache>True</BranchCache>
+			<ContentFallback>True</ContentFallback>
+			<OnSlowNetwork>Download</OnSlowNetwork>
+			<InstallProgram>Audacity32.exe /VERYSILENT /NORESTART</InstallProgram>
+			<UninstallCmd></UninstallCmd>
+			<InstallationBehaviorType>InstallForSystem</InstallationBehaviorType>
+			<LogonReqType>WhetherOrNotUserLoggedOn</LogonReqType>
+			<UserInteractionMode>Hidden</UserInteractionMode>
+			<EstRuntimeMins>15</EstRuntimeMins>
+			<MaxRuntimeMins>60</MaxRuntimeMins>
+			<RebootBehavior>BasedOnExitCode</RebootBehavior>
+			<DetectionMethodType>Custom</DetectionMethodType>
+			<CustomDetectionMethods>
+				<DetectionClause>
+					<DetectionClauseType>File</DetectionClauseType>
+					<Name>Audacity.exe</Name>
+					<Path>%ProgramFiles (x86)%\Audacity\</Path>
+					<PropertyType>Version</PropertyType>
+					<ExpectedValue>$Version</ExpectedValue>
 					<ExpressionOperator>GreaterEquals</ExpressionOperator>
 					<Value>True</Value>
 				</DetectionClause>
