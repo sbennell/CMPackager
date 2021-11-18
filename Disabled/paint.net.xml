@@ -1,0 +1,123 @@
+<ApplicationDef>
+    <Application>
+        <Name>paint.net</Name>
+        <Description>Paint.NET is free image and photo editing software for PCs that run Windows. It features an intuitive and innovative user interface with support for layers, unlimited undo, special effects, and a wide variety of useful and powerful tools. An active and growing online community provides friendly help, tutorials, and plugins.</Description>
+        <Publisher>dotPDN </Publisher>
+        <AutoInstall>True</AutoInstall>
+        <UserDocumentation>https://www.getpaint.net/</UserDocumentation>
+        <Icon>paintnet.ico</Icon>
+		<FolderPath>paint.net</FolderPath>
+    </Application>
+    <Downloads>
+        <Download DeploymentType="DeploymentType1">
+            <PrefetchScript> $getURL = ((Invoke-WebRequest https://www.dotpdn.com/downloads/pdn.html).Links | Where-Object outerText -like "paint.net*").href.ToString()
+			$URL = "https://www.dotpdn.com/$getURL"
+			</PrefetchScript>
+			<DownloadFileName>paint.net.zip</DownloadFileName>
+			<DownloadVersionCheck>Expand-Archive $DownloadFile -DestinationPath $TempDir -ErrorAction SilentlyContinue
+			Get-ChildItem "$TempDir\paint.net.*.install.exe" | Rename-Item -NewName "$TempDir\paint.net.setup.exe"
+			Start-Process $TempDir\paint.net.setup.exe -ArgumentList "/createMsi CHECKFORUPDATES=0 DESKTOPSHORTCUT=0 /auto" -Wait
+			Move-Item -Path "$($env:USERPROFILE)\Desktop\PaintDotNetMsi\*.msi"  -Destination $TempDir
+			Remove-Item -Path "$($env:USERPROFILE)\Desktop\PaintDotNetMsi" -Recurse -Force
+			$Version = (get-item $TempDir\paint.net.setup.exe).VersionInfo.ProductVersion
+			$FullVersion = (get-item $TempDir\paint.net.setup.exe).VersionInfo.ProductVersion
+			$DownloadFile = "$TempDir\PaintDotNet_x64.msi"
+			$Version = (get-item $TempDir\paint.net.setup.exe).VersionInfo.ProductVersion
+			</DownloadVersionCheck>
+			<FullVersion></FullVersion>
+			<Version></Version>
+        </Download>
+        <Download DeploymentType="DeploymentType2">
+            <PrefetchScript>
+			$DownloadFile = "$TempDir\PaintDotNet_x86.msi"
+			$Version = (get-item $TempDir\paint.net.setup.exe).VersionInfo.ProductVersion
+			$FullVersion = (get-item $TempDir\paint.net.setup.exe).VersionInfo.ProductVersion
+			$Download.Version = [string]$Version
+			$ApplicationSWVersion = $Download.Version
+			</PrefetchScript>
+			<Version></Version>
+        </Download>
+	</Downloads>
+	<DeploymentTypes>
+		<DeploymentType Name="DeploymentType1">
+			<DeploymentTypeName>Paint.Net Silent Install x64</DeploymentTypeName>
+			<InstallationType>MSI</InstallationType>
+			<Comments>Silent Installer for Paint.Net x64</Comments>
+			<Language>English</Language>
+			<CacheContent>False</CacheContent>
+			<BranchCache>True</BranchCache>
+			<ContentFallback>True</ContentFallback>
+			<OnSlowNetwork>Download</OnSlowNetwork>
+			<InstallationMSI>PaintDotNet_x64.msi</InstallationMSI>
+			<UninstallCmd></UninstallCmd>
+			<Force32bit>False</Force32bit>
+			<InstallationBehaviorType>InstallForSystem</InstallationBehaviorType>
+			<LogonReqType>WhetherOrNotUserLoggedOn</LogonReqType>
+			<UserInteractionMode>Hidden</UserInteractionMode>
+			<ReqUserInteraction>False</ReqUserInteraction>
+			<EstRuntimeMins>5</EstRuntimeMins>
+			<MaxRuntimeMins>15</MaxRuntimeMins>
+			<RebootBehavior>BasedOnExitCode</RebootBehavior>
+			<DetectionMethodType>MSI</DetectionMethodType>
+			<RequirementsRules>
+				<RequirementsRule>
+					<RequirementsRuleType>Existential</RequirementsRuleType>
+					<RequirementsRuleValue>
+						<RuleValue>True</RuleValue>
+					</RequirementsRuleValue>
+					<RequirementsRuleGlobalCondition>AutoPackage - OSArchitecture x64</RequirementsRuleGlobalCondition>
+				</RequirementsRule>
+					<RequirementsRule>
+					<RequirementsRuleType>OperatingSystem</RequirementsRuleType>
+					<RequirementsRuleValue>
+						<RuleValue>Windows/All_x64_Windows_11_and_higher_Clients</RuleValue>
+						<RuleValue>Windows/All_x64_Windows_10_and_higher_Clients</RuleValue>
+						<RuleValue>Windows/All_x64_Windows_8.1_Client</RuleValue>
+					</RequirementsRuleValue>
+					<RequirementsRuleOperator>OneOf</RequirementsRuleOperator>
+				</RequirementsRule>	
+			</RequirementsRules>
+		</DeploymentType>
+		<DeploymentType Name="DeploymentType2">
+			<DeploymentTypeName>Paint.Net Silent Install x86</DeploymentTypeName>
+			<InstallationType>MSI</InstallationType>
+			<Comments>Silent Installer for Paint.Net x86</Comments>
+			<Language>English</Language>
+			<CacheContent>False</CacheContent>
+			<BranchCache>True</BranchCache>
+			<ContentFallback>True</ContentFallback>
+			<OnSlowNetwork>Download</OnSlowNetwork>
+			<InstallationMSI>PaintDotNet_x86.msi</InstallationMSI>
+			<UninstallCmd></UninstallCmd>
+			<Force32bit>False</Force32bit>
+			<InstallationBehaviorType>InstallForSystem</InstallationBehaviorType>
+			<LogonReqType>WhetherOrNotUserLoggedOn</LogonReqType>
+			<UserInteractionMode>Hidden</UserInteractionMode>
+			<ReqUserInteraction>False</ReqUserInteraction>
+			<EstRuntimeMins>5</EstRuntimeMins>
+			<MaxRuntimeMins>15</MaxRuntimeMins>
+			<RebootBehavior>BasedOnExitCode</RebootBehavior>
+			<DetectionMethodType>MSI</DetectionMethodType>
+			<RequirementsRules>
+				<RequirementsRule>
+					<RequirementsRuleType>OperatingSystem</RequirementsRuleType>
+					<RequirementsRuleValue>
+						<RuleValue>Windows/All_x86_Windows_10_and_higher_Clients</RuleValue>
+						<RuleValue>Windows/All_x86_Windows_8.1_Client</RuleValue>
+					</RequirementsRuleValue>
+					<RequirementsRuleOperator>OneOf</RequirementsRuleOperator>
+				</RequirementsRule>		
+			</RequirementsRules>
+		</DeploymentType>
+	</DeploymentTypes>
+	<Distribution>
+		<DistributeContent>True</DistributeContent>
+	</Distribution>
+	<Supersedence>
+		<Supersedence>True</Supersedence>
+	</Supersedence>
+	<Deployment>
+		<DeploySoftware>True</DeploySoftware>
+		<UpdateSuperseded>True</UpdateSuperseded>
+	</Deployment>
+</ApplicationDef>
