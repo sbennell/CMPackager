@@ -10,32 +10,22 @@
     </Application>
     <Downloads>
         <Download DeploymentType="DeploymentType1">
-            <PrefetchScript> $getURL = ((Invoke-WebRequest https://www.dotpdn.com/downloads/pdn.html).Links | Where-Object outerText -like "paint.net*").href.ToString()
-			$URL = "https://www.dotpdn.com/$getURL"
-			</PrefetchScript>
-			<DownloadFileName>paint.net.zip</DownloadFileName>
+			<PrefetchScript>$LinkPath = ((Invoke-WebRequest https://github.com/paintdotnet/release/releases/latest -UseBasicParsing)| Select-Object -ExpandProperty Links | Where-Object -Property href -Like "*.install.x64.zip").href
+			$URL = "https://github.com$LinkPath"
+			$Download.Version = ([String](Invoke-RestMethod https://api.github.com/repos/paintdotnet/release/releases/latest).tag_name.Trim('v')).TrimStart().TrimEnd()
+			$Version = $Download.Version
+			$FullVersion = $Download.Version
+			</PrefetchScript> 
+			<DownloadFileName>paint.net.x64.zip</DownloadFileName>
 			<DownloadVersionCheck>Expand-Archive $DownloadFile -DestinationPath $TempDir -ErrorAction SilentlyContinue
-			Get-ChildItem "$TempDir\paint.net.*.install.exe" | Rename-Item -NewName "$TempDir\paint.net.setup.exe"
-			Start-Process $TempDir\paint.net.setup.exe -ArgumentList "/createMsi CHECKFORUPDATES=0 DESKTOPSHORTCUT=0 /auto" -Wait
+			Get-ChildItem "$TempDir\paint.net.*.install*.exe" | Rename-Item -NewName "$TempDir\paint.net.setup.x64.exe"
+			Start-Process $TempDir\paint.net.setup.x64.exe -ArgumentList "/createMsi CHECKFORUPDATES=0 DESKTOPSHORTCUT=0 /auto" -Wait
 			Move-Item -Path "$($env:USERPROFILE)\Desktop\PaintDotNetMsi\*.msi"  -Destination $TempDir
-			Remove-Item -Path "$($env:USERPROFILE)\Desktop\PaintDotNetMsi" -Recurse -Force
-			$Version = (get-item $TempDir\paint.net.setup.exe).VersionInfo.ProductVersion
-			$FullVersion = (get-item $TempDir\paint.net.setup.exe).VersionInfo.ProductVersion
 			$DownloadFile = "$TempDir\PaintDotNet_x64.msi"
-			$Version = (get-item $TempDir\paint.net.setup.exe).VersionInfo.ProductVersion
 			</DownloadVersionCheck>
 			<FullVersion></FullVersion>
 			<Version></Version>
-        </Download>
-        <Download DeploymentType="DeploymentType2">
-            <PrefetchScript>
-			$DownloadFile = "$TempDir\PaintDotNet_x86.msi"
-			$Version = (get-item $TempDir\paint.net.setup.exe).VersionInfo.ProductVersion
-			$FullVersion = (get-item $TempDir\paint.net.setup.exe).VersionInfo.ProductVersion
-			$Download.Version = [string]$Version
-			$ApplicationSWVersion = $Download.Version
-			</PrefetchScript>
-			<Version></Version>
+			<ExtraCopyFunctions>Copy-Item $ScriptRoot\ExtraFiles\paint.net\* -Destination $DestinationPath -recurse -force</ExtraCopyFunctions>
         </Download>
 	</Downloads>
 	<DeploymentTypes>
@@ -66,47 +56,6 @@
 						<RuleValue>True</RuleValue>
 					</RequirementsRuleValue>
 					<RequirementsRuleGlobalCondition>AutoPackage - OSArchitecture x64</RequirementsRuleGlobalCondition>
-				</RequirementsRule>
-					<RequirementsRule>
-					<RequirementsRuleType>OperatingSystem</RequirementsRuleType>
-					<RequirementsRuleValue>
-						<RuleValue>Windows/All_x64_Windows_11_and_higher_Clients</RuleValue>
-						<RuleValue>Windows/All_x64_Windows_10_and_higher_Clients</RuleValue>
-						<RuleValue>Windows/All_x64_Windows_8.1_Client</RuleValue>
-					</RequirementsRuleValue>
-					<RequirementsRuleOperator>OneOf</RequirementsRuleOperator>
-				</RequirementsRule>	
-			</RequirementsRules>
-		</DeploymentType>
-		<DeploymentType Name="DeploymentType2">
-			<DeploymentTypeName>Paint.Net Silent Install x86</DeploymentTypeName>
-			<InstallationType>MSI</InstallationType>
-			<Comments>Silent Installer for Paint.Net x86</Comments>
-			<Language>English</Language>
-			<CacheContent>False</CacheContent>
-			<BranchCache>True</BranchCache>
-			<ContentFallback>True</ContentFallback>
-			<OnSlowNetwork>Download</OnSlowNetwork>
-			<InstallationMSI>PaintDotNet_x86.msi</InstallationMSI>
-			<UninstallCmd></UninstallCmd>
-			<Force32bit>False</Force32bit>
-			<InstallationBehaviorType>InstallForSystem</InstallationBehaviorType>
-			<LogonReqType>WhetherOrNotUserLoggedOn</LogonReqType>
-			<UserInteractionMode>Hidden</UserInteractionMode>
-			<ReqUserInteraction>False</ReqUserInteraction>
-			<EstRuntimeMins>5</EstRuntimeMins>
-			<MaxRuntimeMins>15</MaxRuntimeMins>
-			<RebootBehavior>BasedOnExitCode</RebootBehavior>
-			<DetectionMethodType>MSI</DetectionMethodType>
-			<RequirementsRules>
-				<RequirementsRule>
-					<RequirementsRuleType>OperatingSystem</RequirementsRuleType>
-					<RequirementsRuleValue>
-						<RuleValue>Windows/All_x86_Windows_10_and_higher_Clients</RuleValue>
-						<RuleValue>Windows/All_x86_Windows_8.1_Client</RuleValue>
-					</RequirementsRuleValue>
-					<RequirementsRuleOperator>OneOf</RequirementsRuleOperator>
-				</RequirementsRule>		
 			</RequirementsRules>
 		</DeploymentType>
 	</DeploymentTypes>
