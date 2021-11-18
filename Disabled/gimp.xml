@@ -1,0 +1,75 @@
+<ApplicationDef>
+    <Application>
+        <Name>GIMP</Name>
+        <Description>GIMP is a cross-platform image editor available for GNU/Linux, OS X, Windows and more operating systems. It is free software, you can change its source code and distribute your changes. Whether you are a graphic designer, photographer, illustrator, or scientist, GIMP provides you with sophisticated tools to get your job done. You can further enhance your productivity with GIMP thanks to many customization options and 3rd party plugins.</Description>
+        <Publisher>The GIMP Team</Publisher>
+        <AutoInstall>True</AutoInstall>
+        <UserDocumentation>https://www.gimp.org/</UserDocumentation>
+        <Icon>Gimp.ico</Icon>
+	    	<FolderPath>GIMP</FolderPath>
+    </Application>
+    <Downloads>
+        <Download DeploymentType="DeploymentType1">
+            <PrefetchScript>
+			$getURL = ((Invoke-WebRequest https://www.gimp.org/downloads/).Links | Where-Object id -like "win-download-link").href.ToString()
+			$URL = "http:$getURL"
+			</PrefetchScript>
+			<DownloadFileName>gimpsetup.exe</DownloadFileName>
+			<DownloadVersionCheck>$Version = ((Get-Item $TempDir\$DownloadFileName).VersionInfo.ProductVersion).trim()</DownloadVersionCheck>
+			<FullVersion></FullVersion>
+			<Version></Version>
+        </Download>
+	</Downloads>
+	<DeploymentTypes>
+		<DeploymentType Name="DeploymentType1">
+			<DeploymentTypeName>GIMP Silent Install</DeploymentTypeName>
+			<InstallationType>Script</InstallationType>
+			<CacheContent>False</CacheContent>
+			<BranchCache>True</BranchCache>
+			<ContentFallback>True</ContentFallback>
+			<OnSlowNetwork>Download</OnSlowNetwork>
+			<InstallProgram>gimpsetup.exe /VERYSILENT /NORESTART /ALLUSERS</InstallProgram>
+			<UninstallCmd>"%ProgramFiles%\GIMP 2\uninst\unins000.exe" /VERYSILENT /NORESTART</UninstallCmd>
+			<InstallationBehaviorType>InstallForSystem</InstallationBehaviorType>
+			<LogonReqType>WhetherOrNotUserLoggedOn</LogonReqType>
+			<UserInteractionMode>Hidden</UserInteractionMode>
+			<EstRuntimeMins>10</EstRuntimeMins>
+			<MaxRuntimeMins>40</MaxRuntimeMins>
+			<RebootBehavior>BasedOnExitCode</RebootBehavior>
+			<DetectionMethodType>Custom</DetectionMethodType>
+			<CustomDetectionMethods>
+				<DetectionClause>
+					<DetectionClauseType>RegistryKeyValue</DetectionClauseType>
+					<Hive>LocalMachine</Hive>
+					<KeyName>SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\GIMP-2_is1</KeyName>
+					<ValueName>DisplayVersion</ValueName>
+					<PropertyType>Version</PropertyType>
+					<ExpressionOperator>IsEquals</ExpressionOperator>
+					<ExpectedValue>$Version</ExpectedValue>
+					<Value>True</Value>
+				</DetectionClause>
+			</CustomDetectionMethods>
+			<RequirementsRules>
+					<RequirementsRule>
+					<RequirementsRuleType>OperatingSystem</RequirementsRuleType>
+					<RequirementsRuleValue>
+						<RuleValue>Windows/All_x64_Windows_11_and_higher_Clients</RuleValue>
+						<RuleValue>Windows/All_x64_Windows_10_and_higher_Clients</RuleValue>
+						<RuleValue>Windows/All_x86_Windows_10_and_higher_Clients</RuleValue>
+					</RequirementsRuleValue>
+					<RequirementsRuleOperator>OneOf</RequirementsRuleOperator>
+				</RequirementsRule>	
+			</RequirementsRules>
+		</DeploymentType>
+	</DeploymentTypes>
+	<Distribution>
+		<DistributeContent>True</DistributeContent>
+	</Distribution>
+	<Supersedence>
+		<Supersedence>True</Supersedence>
+	</Supersedence>
+	<Deployment>
+		<DeploySoftware>true</DeploySoftware>
+		<UpdateSuperseded>True</UpdateSuperseded>
+	</Deployment>
+</ApplicationDef>
