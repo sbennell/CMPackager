@@ -1,0 +1,73 @@
+<ApplicationDef>
+	<Application>
+		<Name>HandBrake</Name>
+		<Description>HandBrake is a tool for converting video from nearly any format to a selection of modern, widely supported codecs.</Description>
+		<Publisher>The HandBrake Team</Publisher>
+		<AutoInstall>True</AutoInstall>
+		<UserDocumentation>https://handbrake.fr/docs/</UserDocumentation>
+		<Icon>HandBrake.ico</Icon>
+		<FolderPath>HandBrake</FolderPath>
+	</Application>
+	<Downloads>
+		<Download DeploymentType="DeploymentType1">
+			<PrefetchScript>
+			$LinkPath = ((Invoke-WebRequest https://github.com/HandBrake/HandBrake/releases/latest -UseBasicParsing)| Select-Object -ExpandProperty Links | Where-Object -Property href -Like "*HandBrake-*-x86_64-Win_GUI.exe").href
+			$Download.Version = ([String](Invoke-RestMethod https://api.github.com/repos/HandBrake/HandBrake/releases/latest).tag_name.Trim('v')).TrimStart().TrimEnd()
+			$Version = $Download.Version
+			$FullVersion = $Download.Version
+			$URL = "https://github.com$LinkPath"
+			start-sleep 60
+			</PrefetchScript>
+			<URL></URL>
+			<DownloadFileName>HandBrakex86_64.exe</DownloadFileName>
+			<DownloadVersionCheck>
+			</DownloadVersionCheck>
+			<Version></Version>
+			<FullVersion></FullVersion>
+		</Download>
+	</Downloads>
+	<DeploymentTypes>
+		<DeploymentType Name="DeploymentType1">
+			<DeploymentTypeName>HandBrake Silent Installer</DeploymentTypeName>
+			<InstallationType>Script</InstallationType>
+			<CacheContent>False</CacheContent>
+			<BranchCache>True</BranchCache>
+			<ContentFallback>True</ContentFallback>
+			<OnSlowNetwork>Download</OnSlowNetwork>
+			<InstallProgram>HandBrakex86_64.exe /S</InstallProgram>
+			<UninstallCmd>"%ProgramFiles%\HandBrake\uninst.exe" /S</UninstallCmd>
+			<Force32bit>False</Force32bit>
+			<InstallationBehaviorType>InstallForSystem</InstallationBehaviorType>
+			<LogonReqType>WhetherOrNotUserLoggedOn</LogonReqType>
+			<UserInteractionMode>Hidden</UserInteractionMode>
+			<ReqUserInteraction>False</ReqUserInteraction>
+			<EstRuntimeMins>5</EstRuntimeMins>
+			<MaxRuntimeMins>120</MaxRuntimeMins>
+			<RebootBehavior>BasedOnExitCode</RebootBehavior>
+			<DetectionMethodType>Custom</DetectionMethodType>
+			<CustomDetectionMethods>
+				<DetectionClause>
+					<DetectionClauseType>File</DetectionClauseType>
+					<Name>HandBrake.exe</Name>
+					<Path>%ProgramFiles%\HandBrake\</Path>
+					<PropertyType>Version</PropertyType>
+					<ExpectedValue>$Version</ExpectedValue>
+					<ExpressionOperator>GreaterEquals</ExpressionOperator>
+					<Value>True</Value>
+					<Is64Bit>False</Is64Bit>
+				</DetectionClause>
+			</CustomDetectionMethods>
+		</DeploymentType>
+	</DeploymentTypes>
+	<Distribution>
+		<DistributeContent>True</DistributeContent>
+	</Distribution>
+	<Supersedence>
+		<Supersedence>True</Supersedence>
+		<Uninstall>False</Uninstall>
+	</Supersedence>
+	<Deployment>
+		<DeploySoftware>True</DeploySoftware>
+		<UpdateSuperseded>True</UpdateSuperseded>
+	</Deployment>
+</ApplicationDef>
