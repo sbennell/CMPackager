@@ -10,22 +10,38 @@
     </Application>
     <Downloads>
         <Download DeploymentType="DeploymentType1">
-			<PrefetchScript>$LinkPath = ((Invoke-WebRequest https://github.com/paintdotnet/release/releases/latest -UseBasicParsing)| Select-Object -ExpandProperty Links | Where-Object -Property href -Like "*.install.x64.zip").href
+			<PrefetchScript>$LinkPath = ((Invoke-WebRequest https://github.com/paintdotnet/release/releases/latest -UseBasicParsing)| Select-Object -ExpandProperty Links | Where-Object -Property href -Like "*.winmsi.x64.zip").href
 			$URL = "https://github.com$LinkPath"
 			$Download.Version = ([String](Invoke-RestMethod https://api.github.com/repos/paintdotnet/release/releases/latest).tag_name.Trim('v')).TrimStart().TrimEnd()
 			$Version = $Download.Version
 			$FullVersion = $Download.Version
 			</PrefetchScript> 
 			<DownloadFileName>paint.net.x64.zip</DownloadFileName>
-			<DownloadVersionCheck>Expand-Archive $DownloadFile -DestinationPath $TempDir -ErrorAction SilentlyContinue
-			Get-ChildItem "$TempDir\paint.net.*.install*.exe" | Rename-Item -NewName "$TempDir\paint.net.setup.x64.exe"
-			Start-Process $TempDir\paint.net.setup.x64.exe -ArgumentList "/createMsi CHECKFORUPDATES=0 DESKTOPSHORTCUT=0 /auto" -Wait
-			Move-Item -Path "$($env:USERPROFILE)\Desktop\PaintDotNetMsi\*.msi"  -Destination $TempDir
+			<DownloadVersionCheck>
+			Expand-Archive $DownloadFile -DestinationPath $TempDir -ErrorAction SilentlyContinue
+			Get-ChildItem "$TempDir\paint.net.$Version.winmsi.x64.msi" | Rename-Item -NewName "$TempDir\PaintDotNet_x64.msi"
 			$DownloadFile = "$TempDir\PaintDotNet_x64.msi"
 			</DownloadVersionCheck>
 			<FullVersion></FullVersion>
 			<Version></Version>
-			<ExtraCopyFunctions>Copy-Item $ScriptRoot\ExtraFiles\paint.net\* -Destination $DestinationPath -recurse -force</ExtraCopyFunctions>
+			<ExtraCopyFunctions>Copy-Item $ScriptRoot\ExtraFiles\paint.net\install_64.ps1 -Destination $DestinationPath -recurse -force</ExtraCopyFunctions>
+        </Download>
+        <Download DeploymentType="DeploymentType2">
+			<PrefetchScript>$LinkPath = ((Invoke-WebRequest https://github.com/paintdotnet/release/releases/latest -UseBasicParsing)| Select-Object -ExpandProperty Links | Where-Object -Property href -Like "*.winmsi.x86.zip").href
+			$URL = "https://github.com$LinkPath"
+			$Download.Version = ([String](Invoke-RestMethod https://api.github.com/repos/paintdotnet/release/releases/latest).tag_name.Trim('v')).TrimStart().TrimEnd()
+			$Version = $Download.Version
+			$FullVersion = $Download.Version
+			</PrefetchScript> 
+			<DownloadFileName>paint.net.x86.zip</DownloadFileName>
+			<DownloadVersionCheck>
+			Expand-Archive $DownloadFile -DestinationPath $TempDir -ErrorAction SilentlyContinue
+			Get-ChildItem "$TempDir\paint.net.$Version.winmsi.x86.msi" | Rename-Item -NewName "$TempDir\PaintDotNet_x86.msi"
+			$DownloadFile = "$TempDir\PaintDotNet_x86.msi"
+			</DownloadVersionCheck>
+			<FullVersion></FullVersion>
+			<Version></Version>
+			<ExtraCopyFunctions>Copy-Item $ScriptRoot\ExtraFiles\paint.net\install_86.ps1 -Destination $DestinationPath -recurse -force</ExtraCopyFunctions>
         </Download>
 	</Downloads>
 	<DeploymentTypes>
@@ -38,6 +54,7 @@
 			<BranchCache>True</BranchCache>
 			<ContentFallback>True</ContentFallback>
 			<OnSlowNetwork>Download</OnSlowNetwork>
+			<InstallProgram>powershell -executionpolicy bypass .\install_64.ps1</InstallProgram>
 			<InstallationMSI>PaintDotNet_x64.msi</InstallationMSI>
 			<UninstallCmd></UninstallCmd>
 			<Force32bit>False</Force32bit>
@@ -58,6 +75,28 @@
 					<RequirementsRuleGlobalCondition>AutoPackage - OSArchitecture x64</RequirementsRuleGlobalCondition>
 			</RequirementsRules>
 		</DeploymentType>
+		<DeploymentType Name="DeploymentType2">
+			<DeploymentTypeName>Paint.Net Silent Install x86</DeploymentTypeName>
+			<InstallationType>MSI</InstallationType>
+			<Comments>Silent Installer for Paint.Net x86</Comments>
+			<Language>English</Language>
+			<CacheContent>False</CacheContent>
+			<BranchCache>True</BranchCache>
+			<ContentFallback>True</ContentFallback>
+			<OnSlowNetwork>Download</OnSlowNetwork>
+			<InstallProgram>powershell -executionpolicy bypass .\install_86.ps1</InstallProgram>
+			<InstallationMSI>PaintDotNet_x86.msi</InstallationMSI>
+			<UninstallCmd></UninstallCmd>
+			<Force32bit>False</Force32bit>
+			<InstallationBehaviorType>InstallForSystem</InstallationBehaviorType>
+			<LogonReqType>WhetherOrNotUserLoggedOn</LogonReqType>
+			<UserInteractionMode>Hidden</UserInteractionMode>
+			<ReqUserInteraction>False</ReqUserInteraction>
+			<EstRuntimeMins>5</EstRuntimeMins>
+			<MaxRuntimeMins>15</MaxRuntimeMins>
+			<RebootBehavior>BasedOnExitCode</RebootBehavior>
+			<DetectionMethodType>MSI</DetectionMethodType>
+		</DeploymentType>
 	</DeploymentTypes>
 	<Distribution>
 		<DistributeContent>True</DistributeContent>
@@ -67,6 +106,5 @@
 	</Supersedence>
 	<Deployment>
 		<DeploySoftware>True</DeploySoftware>
-		<UpdateSuperseded>True</UpdateSuperseded>
 	</Deployment>
 </ApplicationDef>
