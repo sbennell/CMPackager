@@ -1575,49 +1575,52 @@ Combines the output from Get-ChildItem with the Get-ExtensionAttribute function,
 		## Deploys the Created application based on the Information in the Recipe XML under the Deployment Node
 		Push-Location
 		Set-Location $CMSite
-		If ([System.Convert]::ToBoolean($Recipe.ApplicationDef.Deployment.DeploySoftware)) {
-			$DeploymentSplat = @{
-				Name = "$ApplicationName $ApplicationSWVersion"
-				DeployAction = 'Install'
-				DeployPurpose = 'Available'
-				UserNotification = 'DisplaySoftwareCenterOnly'
-				UpdateSupersedence = [System.Convert]::ToBoolean($Recipe.ApplicationDef.Deployment.UpdateSuperseded)
-				AllowRepairApp = [System.Convert]::ToBoolean($Recipe.ApplicationDef.Deployment.AllowRepair)
-				ErrorAction = 'Stop'
-			}
-
-			if (-not ([string]::IsNullOrEmpty($Recipe.ApplicationDef.Deployment.AvailableOffset))) {
-				$DeploymentSplat['AvailableDateTime'] = (Get-Date) + $Recipe.ApplicationDef.Deployment.AvailableOffset
-			}
-
-			if (-not ([string]::IsNullOrEmpty($Recipe.ApplicationDef.Deployment.DeadlineOffset))) {
-				$DeploymentSplat['DeadlineDateTime'] = (Get-Date) + $Recipe.ApplicationDef.Deployment.DeadlineOffset
-			}
-
-			if (-not ([string]::IsNullOrEmpty($Recipe.ApplicationDef.Deployment.TimeBaseOn))) {
-				# Only 'LocalTime' or 'UTC' are accepted values, but let CM error.
-				$DeploymentSplat['TimeBaseOn'] = $Recipe.ApplicationDef.Deployment.TimeBaseOn
-			}
-
-			$DeploymentCollections = If (
-				-not ([string]::IsNullOrEmpty($Recipe.ApplicationDef.Deployment.DeploymentCollection))
-				) {
-				$Recipe.ApplicationDef.Deployment.DeploymentCollection
-			} elseIf (-not ([String]::IsNullOrEmpty($Global:PreferredDeployCollection))) {
-				$Global:PreferredDeployCollection
-			}
-
-			Foreach ($DeploymentCollection in $DeploymentCollections) {
-				Try {
-					Add-LogContent "Deploying $ApplicationName $ApplicationSWVersion to $DeploymentCollection"
-					If ($DeploymentSplat.UpdateSupersedence) { Add-LogContent "UpdateSuperseded enabled, new package will automatically upgrade previous version" }
-					New-CMApplicationDeployment -CollectionName $DeploymentCollection @DeploymentSplat
+		foreach ($deployment in $Recipe.ApplicationDef.Deployment) 
+		{
+			If ([System.Convert]::ToBoolean($Deployment.DeploySoftware)) {
+				$DeploymentSplat = @{
+					Name = "$ApplicationName $ApplicationSWVersion"
+					DeployAction = 'Install'
+					DeployPurpose = 'Available'
+					UserNotification = 'DisplaySoftwareCenterOnly'
+					UpdateSupersedence = [System.Convert]::ToBoolean($Deployment.UpdateSuperseded)
+					AllowRepairApp = [System.Convert]::ToBoolean($Deployment.AllowRepair)
+					ErrorAction = 'Stop'
 				}
-				Catch {
-					$ErrorMessage = $_.Exception.Message
-					Add-LogContent "ERROR: Deployment Failed!"
-					Add-LogContent "ERROR: $ErrorMessage"
-					$Success = $false
+
+				if (-not ([string]::IsNullOrEmpty($Deployment.AvailableOffset))) {
+					$DeploymentSplat['AvailableDateTime'] = (Get-Date) + $Deployment.AvailableOffset
+				}
+
+				if (-not ([string]::IsNullOrEmpty($Deployment.DeadlineOffset))) {
+					$DeploymentSplat['DeadlineDateTime'] = (Get-Date) + $Deployment.DeadlineOffset
+				}
+
+				if (-not ([string]::IsNullOrEmpty($Deployment.TimeBaseOn))) {
+					# Only 'LocalTime' or 'UTC' are accepted values, but let CM error.
+					$DeploymentSplat['TimeBaseOn'] = $Deployment.TimeBaseOn
+				}
+
+				$DeploymentCollections = If (
+					-not ([string]::IsNullOrEmpty($Deployment.DeploymentCollection))
+					) {
+					$Deployment.DeploymentCollection
+				} elseIf (-not ([String]::IsNullOrEmpty($Global:PreferredDeployCollection))) {
+					$Global:PreferredDeployCollection
+				}
+
+				Foreach ($DeploymentCollection in $DeploymentCollections) {
+					Try {
+						Add-LogContent "Deploying $ApplicationName $ApplicationSWVersion to $DeploymentCollection"
+						If ($DeploymentSplat.UpdateSupersedence) { Add-LogContent "UpdateSuperseded enabled, new package will automatically upgrade previous version" }
+						New-CMApplicationDeployment -CollectionName $DeploymentCollection @DeploymentSplat
+					}
+					Catch {
+						$ErrorMessage = $_.Exception.Message
+						Add-LogContent "ERROR: Deployment Failed!"
+						Add-LogContent "ERROR: $ErrorMessage"
+						$Success = $false
+					}
 				}
 			}
 		}
@@ -1677,6 +1680,52 @@ Combines the output from Get-ChildItem with the Get-ExtensionAttribute function,
 		}
 		Write-Output $true
 	}
+
+	function Invoke-ApplicationCleanup {
+		param (
+			$Recipe
+		)
+		If (-not ([string]::IsNullOrEmpty($Recipe.ApplicationDef.Supersedence.CleanupSuperseded))) {
+			$CleanupEnabled = [System.Convert]::ToBoolean($Recipe.ApplicationDef.Supersedence.CleanupSuperseded)
+		}
+		else {
+			$CleanupEnabled = $false
+		}
+		$ApplicationName = $Recipe.ApplicationDef.Application.Name
+		$CleanupEnabled = $Recipe.ApplicationDef.Supersedence.CleanupSuperseded
+		$keep = $Recipe.ApplicationDef.Supersedence.KeepSuperseded
+
+		Write-Output "Cleanup is $CleanupEnabled"
+		if ($CleanupEnabled) {
+			
+			Push-Location
+			Set-Location $CMSite
+			Write-Output "Keeping $Keep superseded revisions of $ApplicationName"
+			$Applications = Get-CMApplication -Name "$ApplicationName*" | Where-Object IsSuperseded -eq $true | Sort-Object DateCreated
+			$Applications = $Applications | Select-Object -First ($Applications.Count - $keep)
+			ForEach ($Application in $Applications) {
+				# Get the content location and remove it
+				Write-Host "Cleaning up $($Application.LocalizedDisplayName)"
+				Pop-Location
+				$ApplicationXML = [Microsoft.ConfigurationManagement.ApplicationManagement.Serialization.SccmSerializer]::DeserializeFromString($Application.SDMPackageXML, $true)
+				$Location = $ApplicationXML.DeploymentTypes[0].Installer.Contents | Select-Object -ExpandProperty Location # BUGBUG: Get all the deployment locations and remove them
+				Remove-Item -LiteralPath $Location -Recurse
+				Add-LogContent "Removed application content from $Location`n"
+				# Remove the deployments and app itself
+				Push-Location
+				Set-Location $CMSite
+				$Application | Get-CMApplicationDeployment | Remove-CMApplicationDeployment -Force
+				Get-CMApplication $Application.LocalizedDisplayName | Remove-CMApplication -Force
+				## Send an Email if an Application was successfully cleaned up and record the Application Name and Version for the Email
+				$Global:SendEmail = $true; $Global:SendEmail | Out-Null
+				$Global:EmailBody += "      - Removed $($Application.LocalizedDisplayName) `n"
+				Add-LogContent "Removed $($Application.LocalizedDisplayName) $($Application.SoftwareVersion)`n"
+			}
+			Pop-Location
+			
+		}
+		Write-Output $true
+	}	
 
 	Function Send-EmailMessage {
 		Add-LogContent "Sending Email"
@@ -2018,6 +2067,8 @@ Combines the output from Get-ChildItem with the Get-ExtensionAttribute function,
 		$ApplicationDistribution = $false
 		$ApplicationSupersedence = $false
 		$ApplicationDeployment = $false
+		$ApplicationCleanup = $false
+		
 	
 		try {
 			## Import Recipe
@@ -2052,6 +2103,11 @@ Combines the output from Get-ChildItem with the Get-ExtensionAttribute function,
 			If ($ApplicationSupersedence) {
 				Write-Output "Application Deployment"
 				$ApplicationDeployment = Invoke-ApplicationDeployment -Recipe $ApplicationRecipe
+				Add-logContent "Completed Processing of $Recipe"
+			}
+			If ($ApplicationDeployment) {
+				Write-Output "Application Cleanup"
+				$ApplicationDeployment = Invoke-ApplicationCleanup -Recipe $ApplicationRecipe
 				Add-logContent "Completed Processing of $Recipe"
 			}
 			if ($Global:TemplateApplicationCreatedFlag -eq $true) {
